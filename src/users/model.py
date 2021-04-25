@@ -2,8 +2,6 @@ from uuid import uuid1
 from database.neo4j import NeoDB
 from flask import current_app
 
-#current_app.logger.info(result)
-
 def user_serializer(record):
     return {'id': record['id'], 
             'name': record['name'], 

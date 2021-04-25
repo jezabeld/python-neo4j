@@ -1,6 +1,7 @@
 from flask import (Blueprint, request, jsonify)
 from uuid import uuid1
 from . import model
+from flask import current_app
 
 bp = Blueprint('users',__name__, url_prefix='/users')
 
@@ -28,7 +29,7 @@ def get_user(id):
         return {"message": "Internal server error"}, 500
 
 @bp.route('/', methods=['POST'])
-def post_user():
+def create_user():
     try:
         user = request.get_json()
         # chequear que el user tiene toda la data necesaria (?)
@@ -40,7 +41,7 @@ def post_user():
         return {"message": "Internal server error"}, 500
 
 @bp.route('/', methods=['PUT'])
-def put_user():
+def update_user():
     try:
         user = request.get_json()
         # chequear que el user tiene toda la data necesaria
