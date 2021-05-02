@@ -1,17 +1,13 @@
 from uuid import uuid1
 from database.neo4j import NeoDB
 from flask import current_app
-from products import model as prodModels
-
-class ProductNotFound(Exception):
-    def __init__(self, productId):
-        self.productId = productId
+from errors import ProductNotFound
 
 def find_db(user_id,id):
     session = NeoDB().get_session()
     query = """ MATCH (u:User {id: $user_id})-[r:BOUGHT {id: $id}]-(p:Product)
                 WITH r.id as purchase_id,u.id as user_id, r.date as date, sum(r.quantity) as qty, collect( r{.item, .price, .quantity}) as items
-                RETURN {purchase_id: purchase_id, user_id: user_id, date: date, total: reduce(t=0, i in items | t + (i.price * i.quantity)),  qty:qty, items:items} as purchase"""
+                RETURN {purchase_id: purchase_id, user_id: user_id, date: date, total: round(reduce(t=0, i in items | t + (i.price * i.quantity)),2),  qty:qty, items:items} as purchase"""
     result = session.run(query, {'id':id, 'user_id': user_id}).single()
     purchase = result.data()['purchase'] if result != None else result
     session.close()
@@ -21,7 +17,7 @@ def get_db(user_id):
     session = NeoDB().get_session()
     query = """ MATCH (u:User {id: $user_id})-[r:BOUGHT ]-(p:Product)
                 WITH r.id as purchase_id,u.id as user_id, r.date as date, sum(r.quantity) as qty, collect( r{.item, .price, .quantity}) as items
-                RETURN {purchase_id: purchase_id, user_id: user_id, date: date, total: reduce(t=0, i in items | t + (i.price * i.quantity)),  qty:qty, items:items} as purchase"""
+                RETURN {purchase_id: purchase_id, user_id: user_id, date: date, total: round(reduce(t=0, i in items | t + (i.price * i.quantity)),2),  qty:qty, items:items} as purchase"""
     result = session.run(query, {'user_id':user_id})
     purchases = []
     for item in result.data():
@@ -29,14 +25,7 @@ def get_db(user_id):
     session.close()
     return purchases
 
-def save_db(user,items):
-    # verificar si los eproc existen (loop de prods)
-    products = []
-    for item in items:
-        product = prodModels.find_db(item['id'])
-        if (product == None):
-            raise ProductNotFound(item['id'])
-        products.append({**product, 'quantity': item['quantity']})
+def save_db(user,products):
     purchase_id = str(uuid1())
 
     query = f"MATCH (u:User {{id: '{user['id']}'}}) "
