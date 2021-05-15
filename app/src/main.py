@@ -2,6 +2,7 @@ from flask import Flask, current_app
 from users import routes as userRoutes
 from products import routes as productRoutes
 from purchases import routes as purchaseRoutes
+from recommendations import routes as recommendationRoutes
 from werkzeug.exceptions import HTTPException
 import traceback
 
@@ -17,6 +18,7 @@ def ping():
 app.register_blueprint(userRoutes.bp)
 app.register_blueprint(productRoutes.bp)
 app.register_blueprint(purchaseRoutes.bp)
+app.register_blueprint(recommendationRoutes.bp)
 
 @app.errorhandler(Exception)
 def handle_exception(e):
