@@ -2,11 +2,6 @@ from neo4j import (GraphDatabase, basic_auth)
 import os
 import atexit
 
-# Get environment variables
-USER = os.getenv('DATABASE_USERNAME')
-PASSWORD = os.environ.get('DATABASE_PASSWORD')
-DB_URL = os.environ.get('DATABASE_URL')
-
 class Singleton(object):
     _instance = None
     def __new__(class_, *args, **kwargs):
@@ -16,15 +11,20 @@ class Singleton(object):
 
 class NeoDB(Singleton):
     driver = None
+    
     def get_driver(self):
         if (self.driver != None):
             return self.driver
-        self.driver = GraphDatabase.driver(DB_URL, auth=basic_auth(USER, PASSWORD))
+
+        # Get environment variables
+        USER = os.getenv('DATABASE_USERNAME')
+        PASSWORD = os.getenv('DATABASE_PASSWORD')
+        DB_URL = os.getenv('DATABASE_URL')
+
+        self.driver = GraphDatabase.driver(DB_URL, auth=(USER, PASSWORD))
         return self.driver
 
     def get_session(self):
-        if (self.driver != None):
-            return self.driver.session()
         return self.get_driver().session()
         
     def close_driver(self):

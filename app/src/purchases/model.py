@@ -1,5 +1,5 @@
 from uuid import uuid1
-from database.neo4j import NeoDB
+from database.neo import NeoDB
 from flask import current_app
 from errors import ProductNotFound
 
